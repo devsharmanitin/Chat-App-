@@ -1,0 +1,623 @@
+{% extends 'base.html' %}
+{% block Title %} Chat {% endblock Title %}
+{% load static %}
+
+{% block Content %}
+
+
+
+<style>
+
+    body{
+        background-color: #f4f7f6;
+       
+    }
+    .card {
+        background: #fff;
+        transition: .5s;
+        border: 0;
+        
+        border-radius: .55rem;
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 10%);
+    }
+    .chat-app .people-list {
+        width: 280px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        padding: 20px;
+        z-index: 7;
+        height: 100%;
+    }
+    
+    .chat-app .chat {
+        margin-left: 280px;
+        border-left: 1px solid #eaeaea;
+        height: 100%;
+    }
+    
+    .people-list {
+        -moz-transition: .5s;
+        -o-transition: .5s;
+        -webkit-transition: .5s;
+        transition: .5s
+    }
+    
+    .people-list .chat-list li {
+        padding: 10px 15px;
+        list-style: none;
+        border-radius: 3px
+    }
+    
+    .chat-unlist{
+        height: 80vh;
+        overflow-y: scroll;
+    }
+
+
+    .chat-unlist::-webkit-scrollbar{
+        display: none;
+    }
+    
+    .people-list .chat-list li:hover {
+        background: #efefef;
+        cursor: pointer
+    }
+    
+    .people-list .chat-list li.active {
+        background: #efefef
+    }
+    
+    .people-list .chat-list li .name {
+        font-size: 15px
+    }
+    
+    .people-list .chat-list img {
+        width: 45px;
+        border-radius: 50%
+    }
+    
+    .people-list img {
+        float: left;
+        border-radius: 50%
+    }
+    
+    .people-list .about {
+        float: left;
+        padding-left: 8px
+    }
+    
+    .people-list .status {
+        color: #999;
+        font-size: 13px
+    }
+    
+    .chat .chat-header {
+        padding: 15px 20px;
+        border-bottom: 2px solid #f4f7f6
+    }
+    
+    .chat .chat-header img {
+        float: left;
+        border-radius: 40px;
+        width: 40px
+    }
+    
+    .chat .chat-header .chat-about {
+        float: left;
+        padding-left: 10px
+    }
+    
+    .chat .chat-history {
+        padding: 20px;
+        border-bottom: 2px solid #fff ;
+        height: 80vh;
+        overflow-y: scroll;
+
+    }
+
+    .chat .chat-history::-webkit-scrollbar{
+        display: none;
+    }
+    
+    .chat .chat-history ul {
+        padding: 0
+    }
+    
+    .chat .chat-history ul li {
+        list-style: none;
+        margin-bottom: 30px;
+        bottom:  0;
+    }
+    
+    .chat .chat-history ul li:last-child {
+        margin-bottom: 0px
+    }
+    
+    .chat .chat-history .message-data {
+        margin-bottom: 15px
+    }
+    
+    .chat .chat-history .message-data img {
+        border-radius: 40px;
+        width: 40px
+    }
+    
+    .chat .chat-history .message-data-time {
+        color: #434651;
+        padding-left: 6px
+    }
+    
+    .chat .chat-history .message {
+        color: #444;
+        padding: 18px 20px;
+        line-height: 26px;
+        font-size: 16px;
+        border-radius: 7px;
+        display: inline-block;
+        position: relative
+    }
+    
+    .chat .chat-history .message:after {
+        bottom: 100%;
+        left: 7%;
+        border: solid transparent;
+        content: " ";
+        height: 0;
+        width: 0;
+        position: absolute;
+        pointer-events: none;
+        border-bottom-color: #fff;
+        border-width: 10px;
+        margin-left: -10px
+    }
+    
+    .chat .chat-history .my-message {
+        background: #efefef
+    }
+    
+    .chat .chat-history .my-message:after {
+        bottom: 100%;
+        left: 30px;
+        border: solid transparent;
+        content: " ";
+        height: 0;
+        width: 0;
+        position: absolute;
+        pointer-events: none;
+        border-bottom-color: #efefef;
+        border-width: 10px;
+        margin-left: -10px
+    }
+    
+    .chat .chat-history .other-message {
+        background: #e8f1f3;
+        text-align: right
+    }
+    
+    .chat .chat-history .other-message:after {
+        border-bottom-color: #e8f1f3;
+        left: 93%
+    }
+    #uxr_cht_m{
+        bottom: 0;
+    }
+    
+    .chat .chat-message {
+        padding: 20px
+    }
+    
+    .online,
+    .offline,
+    .me {
+        margin-right: 2px;
+        font-size: 8px;
+        vertical-align: middle
+    }
+    
+    .online {
+        color: #86c541
+    }
+    
+    .offline {
+        color: #e47297
+    }
+    
+    .me {
+        color: #1d8ecd
+    }
+    
+    .float-right {
+        float: right
+    }
+    
+    .clearfix:after {
+        visibility: hidden;
+        display: block;
+        font-size: 0;
+        content: " ";
+        clear: both;
+        height: 0
+    }
+    
+    @media only screen and (max-width: 767px) {
+        .chat-app .people-list {
+            height: 465px;
+            width: 100%;
+            overflow-x: auto;
+            background: #fff;
+            left: -400px;
+            display: none
+        }
+        .chat-app .people-list.open {
+            left: 0
+        }
+        .chat-app .chat {
+            margin: 0
+        }
+        .chat-app .chat .chat-header {
+            border-radius: 0.55rem 0.55rem 0 0
+        }
+        .chat-app .chat-history {
+            height: 300px;
+            overflow-x: auto
+        }
+    }
+    
+    @media only screen and (min-width: 768px) and (max-width: 992px) {
+        .chat-app .chat-list {
+            height: 650px;
+            overflow-x: auto
+        }
+        .chat-app .chat-history {
+            height: 600px;
+            overflow-x: auto
+        }
+    }
+    
+    @media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) and (-webkit-min-device-pixel-ratio: 1) {
+        .chat-app .chat-list {
+            height: 480px;
+            overflow-x: auto
+        }
+        .chat-app .chat-history {
+            height: calc(100vh - 350px);
+            overflow-x: auto
+        }
+    }
+  </style>
+  
+  
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+  
+  <div class="container">
+  <div class="row clearfix">
+    <div class="col-lg-12">
+        <div class="card chat-app">
+            <div id="plist" class="people-list">
+
+                <ul class="list-unstyled chat-list mt-2 mb-0">
+                        <li class="clearfix" id="chat_user_{{User.id}}" >
+                            <img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="avatar">
+                            <div class="about">
+                                <div class="name">{{request.user.username}}</div>
+                                <div class="status"> <i class="fa fa-circle offline"></i> updated 1 min ago. </div>                                            
+                            </div>
+                        </li>
+                </ul>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fa fa-search"></i></span>
+                    </div>
+                    <input type="text" class="form-control" placeholder="Search...">
+                </div>
+                <ul class="list-unstyled chat-list mt-2 mb-0 chat-unlist">
+
+                    {% for User in GetUsers %}
+                        <li class="clearfix" id="chat_user_{{User.id}}" onclick="UserChatFxn('{{User.id}}')">
+                            <img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="avatar">
+                            <div class="about">
+                                <div class="name">{{User.username}}</div>
+                                <div class="status"> <i class="fa fa-circle offline"></i> updated 1 min ago. </div>                                            
+                            </div>
+                        </li>
+                    {% endfor  %}
+                    
+                </ul>
+            </div>
+            <div class="chat">
+                <div class="chat-header clearfix">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <a href="javascript:void(0);" data-toggle="modal" data-target="#view_info">
+                                <img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="avatar">
+                            </a>
+                            <div class="chat-about">
+                                <h6 class="m-b-0" id="Chx_user">Aiden Chavez</h6>
+                                <small>Last seen: 2 hours ago</small>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 hidden-sm text-right">
+                            <a href="javascript:void(0);" class="btn btn-outline-secondary"><i class="fa fa-camera"></i></a>
+                            <a href="javascript:void(0);" class="btn btn-outline-primary" id="ImageButton" ><i class="fa fa-image"></i></a>
+                            <a href="javascript:void(0);" class="btn btn-outline-info"><i class="fa fa-cogs"></i></a>
+                            <a href="javascript:void(0);" class="btn btn-outline-warning"><i class="fa fa-question"></i></a>
+                        </div>
+                        <!-- Hidden input for selecting images -->
+                        <input type="file" id="imageInput" accept="image/*" style="display: none;">
+
+                        <!-- Image preview -->
+                        <img src=""  id="imagePreview" style="display: none; width: 200px; height: 200px;">
+
+                        <!-- Send button for the selected image -->
+                        <button id="sendImageButton" class="btn btn-outline-primary" style="display: none;  height: 40px; width:150px;">Send Image</button>
+                    </div>
+                </div>
+                <div class="chat-history">
+                    <ul class="m-b-0" id="uxr_cht_m">
+                        <!-- request.user message  -->
+                        <!-- <li class="clearfix">
+                            <div class="message-data text-right ">
+                                <span class="message-data-time float-right">10:10 AM, Today</span>
+                            </div>
+                            <br>
+                            <div class="message other-message float-right"> Hi Aiden, how are you? How is the project coming along? </div>
+                        </li> -->
+
+                        <!-- CustomUser message -->
+                        <!-- <li class="clearfix">
+                            <div class="message-data">
+                                <span class="message-data-time">10:15 AM, Today</span>
+                            </div>
+                            
+                            <div class="message my-message" >Project has been already finished and I have results to show you.</div>
+                        </li> -->
+
+                    </ul>
+                </div>
+                <div class="chat-message clearfix">
+                    <div class="input-group mb-0">
+                        <div class="input-group-prepend">
+                            <button type="button" class="input-group-text" id="message_submit"><i class="fa fa-send"></i></button>
+                        </div>
+                        <input type="text" class="form-control" id="chat_input" placeholder="Enter text here..."> 
+                                                           
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+  </div>
+
+
+
+  <script>
+    
+
+    function UserChatFxn(user_id){
+        // Define the WebSocket connection outside the UserChatFxn function
+        let request_user = {{request.user.id}}
+        const ws = new WebSocket(`ws://localhost:8000/ws/user/${user_id}/connect/${request_user}/`);
+        
+        
+        document.getElementById("uxr_cht_m").innerHTML = '';
+
+
+        // Open function
+        ws.onopen = function(event) {
+            console.log("On Open Event", event);
+        };
+        // Open function End
+
+
+
+        // On message event
+        ws.onmessage = function(event) {
+            console.log("On Message Websocket Event", event);
+            //  parse data getting from backend 
+            const data = JSON.parse(event.data)
+
+
+            // Append the name of user to the chat 
+            if(data.type == "websocket.accept"){
+                const CustomUser = data.CustomUser
+                const messages = data.messages
+
+                document.getElementById("Chx_user").innerHTML = CustomUser;
+
+                // Iterate through the received messages and render them
+                messages.forEach(function(message) {
+                const clearfix = document.createElement('li');
+                clearfix.classList.add('clearfix');
+
+                let messageData = null;
+                let messageDataTime = null;
+                if(message.sender === `{{request.user}}`){
+
+                    messageData = document.createElement('div');
+                    messageData.classList.add('message-data' , 'text-right');
+
+                    messageDataTime = document.createElement('span');
+                    messageDataTime.classList.add('message-data-time' , 'float-right');
+                    messageDataTime.textContent = message.timestamp;
+
+                } else {
+
+                    messageData = document.createElement('div');
+                    messageData.classList.add('message-data');
+
+                    messageDataTime = document.createElement('span');
+                    messageDataTime.classList.add('message-data-time');
+                    messageDataTime.textContent = message.timestamp;
+                }
+                const lineBreak = document.createElement('br');
+
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message');
+
+            // Depending on the sender, add the appropriate class
+                if (message.sender === '{{request.user}}') {
+                    messageDiv.classList.add('other-message' , 'float-right');
+                } else {
+                    messageDiv.classList.add('my-message' , 'other-message');
+                }
+                messageDiv.innerHTML = message.content;
+
+
+                messageData.appendChild(messageDataTime);
+                clearfix.appendChild(messageData);
+                messageData.appendChild(lineBreak);
+                clearfix.appendChild(messageDiv);
+
+            // Append the message to your chat container
+            document.getElementById('uxr_cht_m').appendChild(clearfix);
+        });
+
+            };
+
+
+            // create the message getting from backend 
+            if (data.type === "websocket.send") {
+                
+
+                const Message = data.text_message;
+                const Sender = data.Sender;
+                const Time = data.time;
+
+                // Create a new message element (li) with the clearfix class
+                const clearfix = document.createElement('li');
+                clearfix.classList.add('clearfix');
+
+                // Create the message data container (div)
+                const messageData = document.createElement('div');
+                if (Sender === '{{request.user}}') {
+                    messageData.classList.add('message-data', 'text-right');
+                } else {
+                    
+                    messageData.classList.add('message-data');
+                }
+
+                // Create the message data time (span) element
+                const messageDataTime = document.createElement('span');
+
+                if (Sender === '{{request.user}}') {
+                    messageDataTime.classList.add('message-data-time' , 'float-right');
+                } else {
+                    
+                    messageDataTime.classList.add('message-data-time');
+                }
+                
+                // Set the message data time content (e.g., "10:10 AM, Today")
+                messageDataTime.textContent = `${Time}`;
+
+                // Create a line break (br) element
+                const lineBreak = document.createElement('br');
+
+                // Create the message (div) element with classes
+                const message = document.createElement('div');
+                if (Sender === '{{request.user}}') {
+                    message.classList.add('message', 'other-message', 'float-right');
+                } else {
+                    message.classList.add('message', 'my-message');
+                }
+
+                // Set the message content
+                message.innerHTML = Message;
+
+                // Append elements to build the message structure
+                messageData.appendChild(messageDataTime);
+                clearfix.appendChild(messageData);
+                messageData.appendChild(lineBreak);
+                clearfix.appendChild(message);
+
+                // Append the message to the chat container with the id "uxr_cht_m"
+                User_chat_mx = document.getElementById("uxr_cht_m");
+                User_chat_mx.appendChild(clearfix);
+
+                // Scroll to the bottom
+                User_chat_mx.scrollTop = User_chat_mx.scrollHeight;
+            }  
+        };
+        // On Message Event End
+
+
+
+        // SEND IMAGE CODE 
+
+        document.getElementById("ImageButton").addEventListener('click' , ()=>{
+            document.getElementById("imageInput").click();
+            
+        });
+
+        document.getElementById("imageInput").addEventListener('change' , (event)=>{
+            const file = event.target.files[0];
+
+            if (file){
+
+                const imagePreview = document.getElementById("imagePreview");
+                const sendImageButton = document.getElementById("sendImageButton");
+
+                // Display the selected image in the image preview
+                const reader = new FileReader();
+                reader.onload = (event) =>{
+                    imagePreview.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+
+                // Show the image preview and send button
+                imagePreview.style.display = 'block';
+                sendImageButton.style.display = 'block';
+
+            }
+            else {
+                console.error('No image selected.');
+            }
+        });
+        // END IMAGE CODE 
+
+
+         // Add an event listener to the "message_submit" button
+        document.getElementById("message_submit").addEventListener('click', function() {
+
+                const message_div = document.getElementById("chat_input");
+                const message = message_div.value;
+    
+                // clearing the value of input value
+                message_div.value = '';
+
+                // create mst time 
+                const currentDate = new Date();
+
+                const TimeOptions = {
+                    hour: 'numeric',
+                    minute: 'numeric',
+                    hour12: true, // Use AM/PM format
+                    year: 'numeric',
+                    month: 'numeric',
+                    day: 'numeric',
+                };
+                const formattedTime = currentDate.toLocaleTimeString(undefined, TimeOptions);
+
+
+        
+                // Send the message to the WebSocket server
+                ws.send(
+                    JSON.stringify({
+                        'ChatMessage': message ,
+                        'Sender': '{{request.user}}',
+                        'time': formattedTime,
+                    })
+                );
+                // ws.send end 
+        });
+        // Event Listner End 
+
+    };
+    // UserChatFxn end
+</script>
+
+{% endblock Content %}
